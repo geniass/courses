@@ -1,11 +1,16 @@
-export DATA_DIR=/output
+export DATA_DIR=`pwd`/data
+mkdir $DATA_DIR
 cd $DATA_DIR
 
-mkdir models
-wget http://www.platform.ai/models/vgg16.h5 -O models/vgg16.h5
+# mkdir models
+# wget http://www.platform.ai/models/vgg16.h5 -O models/vgg16.h5
 
-kg download -u aricroock@gmail.com -p "${password}" -c dogs-vs-cats-redux-kernels-edition -f "test.zip"
-kg download -u aricroock@gmail.com -p "${password}" -c dogs-vs-cats-redux-kernels-edition -f "train.zip"
+if [ ! -f test.zip ]; then
+	kg download -u aricroock@gmail.com -p "${password}" -c dogs-vs-cats-redux-kernels-edition -f "test.zip"
+fi
+if [ ! -f train.zip ]; then
+	kg download -u aricroock@gmail.com -p "${password}" -c dogs-vs-cats-redux-kernels-edition -f "train.zip"
+fi
 
 unzip -q train.zip
 unzip -q test.zip
