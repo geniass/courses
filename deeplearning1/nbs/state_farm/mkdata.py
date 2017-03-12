@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, shutil
 from glob import glob
 from math import floor
 import numpy as np
@@ -37,7 +37,7 @@ nb_train = floor(TRAIN_SPLIT * nb_img)
 nb_valid = 0
 valid_files = {}
 while nb_valid < nb_img - nb_train:
-    train_drivers = drivers.keys()
+    train_drivers = list(drivers.keys())
     if len(train_drivers) == 0:
         print("huh")
         break
@@ -53,11 +53,19 @@ print("nb_img: {2}, nb_train: {0}, nb_valid: {1}".format(nb_train, nb_valid, nb_
 try:
     for c in classes:
         # os.mkdir("train/" + c)
-        os.makedirs("valid/" + c)
+        os.makedirs("sample/train/" + c, exist_ok=True)
+        os.makedirs("sample/valid/" + c, exist_ok=True)
+        os.makedirs("valid/" + c, exist_ok=True)
 except OSError as e:
     print(e.message)
 
-for c, fnames in valid_files.iteritems():
+for c, fnames in valid_files.items():
     for f in fnames:
         os.rename(os.path.join("train", c, f), os.path.join("valid", c, f))
+
+# copy a few random drivers from train and validation to make a sample dataset
+for d in np.random.choice(list(drivers.keys()), size=3):
+    for c, fnames in drivers[d].items():
+        for f in fnames:
+            shutil.copyfile(os.path.join("train", c, f), os.path.join("sample", "train", c, f))
 
