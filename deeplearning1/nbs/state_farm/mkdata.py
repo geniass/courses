@@ -42,7 +42,10 @@ while nb_valid < nb_img - nb_train:
         print("huh")
         break
     d = np.random.choice(train_drivers)
-    valid_files.update(drivers[d])
+    for c in list(drivers[d].keys()):
+        if c not in valid_files:
+            valid_files[c] = []
+        valid_files[c].extend(drivers[d][c])
 
     nb_valid += sum([len(cs) for cs in drivers[d].values()])
     del drivers[d]
