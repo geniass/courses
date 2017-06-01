@@ -6,7 +6,6 @@ import numpy as np
 from scipy import misc, ndimage
 from scipy.ndimage.interpolation import zoom
 
-from keras.utils.data_utils import get_file
 from keras import backend as K
 from keras.layers.normalization import BatchNormalization
 from keras.utils.data_utils import get_file
@@ -14,7 +13,7 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout, Lambda
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.layers.pooling import GlobalAveragePooling2D
-from keras.optimizers import SGD, RMSprop, Adam
+from keras.optimizers import SGD, Adam
 from keras.preprocessing import image
 
 
@@ -29,7 +28,7 @@ class Vgg16BN():
 
 
     def __init__(self, size=(224,224), include_top=True):
-        self.FILE_PATH = 'http://www.platform.ai/models/'
+        self.FILE_PATH = 'http://files.fast.ai/models/'
         self.create(size, include_top)
         self.get_classes()
 
@@ -69,7 +68,7 @@ class Vgg16BN():
             include_top=False
 
         model = self.model = Sequential()
-        model.add(Lambda(vgg_preprocess, input_shape=(3,)+size))
+        model.add(Lambda(vgg_preprocess, input_shape=(3,)+size, output_shape=(3,)+size))
 
         self.ConvBlock(2, 64)
         self.ConvBlock(2, 128)
@@ -104,11 +103,12 @@ class Vgg16BN():
         self.compile()
 
     def finetune(self, batches):
-        model = self.model
-        model.pop()
-        for layer in model.layers: layer.trainable=False
-        model.add(Dense(batches.nb_class, activation='softmax'))
-        self.compile()
+        self.ft(batches.nb_class)
+
+        classes = list(iter(batches.class_indices))
+        for c in batches.class_indices:
+            classes[batches.class_indices[c]] = c
+        self.classes = classes
 
 
     def compile(self, lr=0.001):
